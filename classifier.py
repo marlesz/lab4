@@ -1,4 +1,6 @@
 ﻿##  Wzorowane na przykładzie Rona Zacharskiego
+import numpy
+
 
 class Classifier:
 
@@ -36,17 +38,37 @@ class Classifier:
     def getMedian(self, alist):
         """TODO: zwraca medianę listy"""
 
-        return 0
+        return numpy.median(alist)
         
 
     def getAbsoluteStandardDeviation(self, alist, median):
         """TODO: zwraca absolutne odchylenie standardowe listy od mediany"""
-        return 0
+        sum = 0
+        for i in alist:
+            sum += abs(i - median)
+        return sum / len(alist)
 
     def normalizeColumn(self, columnNumber):
-        """TODO: mając dany nr kolumny w self.data, dokonuje normalizacji wg Modified Standard Score"""
-
+        """TODO:
+        1. mając dany nr kolumny w self.data, dokonuje normalizacji wg Modified Standard Score
+        2. zapisz medianę i odchylenie standardowe dla kolumny w self.medianAndDeviation"""
+        col = [i[1][columnNumber] for i in self.data]
+        m = self.getMedian(col)
+        asd = self.getAbsoluteStandardDeviation(col,m)
+        self.medianAndDeviation.append([m, asd])
+        for i in self.data:
+            i[1][columnNumber] = (i[1][columnNumber] - m)/asd
         pass
+
+    def normalizeVector(self, v):
+        """Znormalizuj podany wektor mając daną medianę i odchylenie standardowe dla każdej kolumny"""
+        vector = list(v)
+
+        for i in range(len(vector)):
+            [m, asd] = self.medianAndDeviation[i]
+            vector[i] = (vector[i] - m) / asd
+        return vector
+
 
 
     def manhattan(self, vector1, vector2):
@@ -56,14 +78,14 @@ class Classifier:
 
     def nearestNeighbor(self, itemVector):
         """return nearest neighbor to itemVector"""
-        
-        return ((0, ("TODO: Zwróc najbliższego sąsiada", [0], [])))
-    
+        return min([(self.manhattan(itemVector, i[1]), i) for i in self.data])
+
+
     def classify(self, itemVector):
         """Return class we think item Vector is in"""
+
         return(self.nearestNeighbor(self.normalizeVector(itemVector))[1][0])
-        
-        
+
 def testMedianAndASD():
     list1 = [54, 72, 78, 49, 65, 63, 75, 67, 54]
     list2 = [54, 72, 78, 49, 65, 63, 75, 67, 54, 68]
@@ -181,11 +203,10 @@ def test(training_filename, test_filename):
 
 ##
 ##  Przykłady użycia
-#  test('athletesTrainingSet.txt', 'athletesTestSet.txt')
-#  test("irisTrainingSet.data", "irisTestSet.data")
-#  test("mpgTrainingSet.txt", "mpgTestSet.txt")
+test('athletesTrainingSet.txt', 'athletesTestSet.txt')
+#test("irisTrainingSet.data", "irisTestSet.data")
+#test("mpgTrainingSet.txt", "mpgTestSet.txt")
 
 testMedianAndASD()
-# testNormalization()
-# testClassifier()
-
+testNormalization()
+testClassifier()
